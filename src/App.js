@@ -1,23 +1,43 @@
-import logo from './logo.svg';
-import './App.css';
+import { makeStyles } from '@material-ui/core/styles'
+
+import { PlayingCard } from './components/playingCard'
+import { Color, Suit, Value } from './components/playingCard/constants.js'
+
+const useStyles = makeStyles({
+    cards: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-end',
+        height: '800px',
+        width: '100%'
+    }
+})
 
 function App() {
+  const classes = useStyles();
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className={classes.cards}>
+      <PlayingCard
+        color={Color.BLACK}
+        suit={Suit.HEARTS}
+        value={Value.JACK}
+      />
+      <PlayingCard
+        color={Color.RED}
+        suit={Suit.SPADES}
+        value={Value.QUEEN}
+      />
+      <PlayingCard
+        color={Color.RED}
+        suit={Suit.CLUBS}
+        value={Value.THREE}
+      />
+      <PlayingCard
+        color={Color.BLACK}
+        suit={Suit.DIAMONDS}
+        value={Value.ACE}
+      />
     </div>
   );
 }
