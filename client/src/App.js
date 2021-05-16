@@ -1,4 +1,6 @@
 import { makeStyles } from '@material-ui/core/styles'
+import React, { useEffect } from 'react'
+import socketIOClient from 'socket.io-client';
 
 import { PlayingCard } from './components/playingCard'
 import { Color, Suit, Value } from './components/playingCard/constants.js'
@@ -15,6 +17,13 @@ const useStyles = makeStyles({
 
 function App() {
   const classes = useStyles();
+
+  useEffect(() => {
+    const socket = socketIOClient(
+      'http://127.0.0.1:4001',
+      { transports: ['websocket', 'polling', 'flashsocket'] }
+    );
+  }, []);
 
   return (
     <div className={classes.cards}>
