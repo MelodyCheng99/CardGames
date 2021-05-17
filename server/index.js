@@ -16,7 +16,8 @@ io.on('connection', (socket) => {
 
     // TODO: Place in a different file
     socket.on('enterName', (name) => {
-        console.log(name, 'joined the game!')
+        console.log(name, 'joined the game!');
+        io.emit('playerEntered', name);
     });
 
     socket.on('disconnect', () => {

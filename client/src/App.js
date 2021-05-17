@@ -35,6 +35,7 @@ export const SocketContext = React.createContext();
 function App() {
   const classes = useStyles();
   const [socket, setSocket] = useState(undefined);
+  const [players, setPlayers] = useState([]);
 
   useEffect(() => {
     setSocket(socketIOClient(
@@ -43,12 +44,22 @@ function App() {
     ));
   }, []);
 
+  useEffect(() => {
+    socket && socket.on('playerEntered', (name) => {
+      console.log(name);
+      console.log(players);
+      console.log([...players, name]);
+      setPlayers(players => [...players, name]);
+    });
+  }, [socket]);
+
   return (
     <SocketContext.Provider value={socket}>
         <div>
             <Card className={classes.playersBox}>
                 <CardContent>
                     <Typography>玩家們:</Typography>
+                    <Typography>{players.toString()}</Typography>
                 </CardContent>
             </Card>
             <div className={classes.enterNameBox}>
