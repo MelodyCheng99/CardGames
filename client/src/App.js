@@ -1,4 +1,4 @@
-import { Card, CardContent, Typography } from '@material-ui/core';
+import { Card, CardContent, Typography, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles'
 import React, { useEffect, useState } from 'react'
 import socketIOClient from 'socket.io-client';
@@ -21,11 +21,15 @@ const useStyles = makeStyles({
         width: 150,
         height: 200
     },
+    startGameButton: {
+        marginLeft: 10,
+        marginTop: 10
+    },
     cards: {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'flex-end',
-        height: '800px',
+        height: '550px',
         width: '100%'
     }
 })
@@ -36,6 +40,8 @@ function App() {
   const classes = useStyles();
   const [socket, setSocket] = useState(undefined);
   const [players, setPlayers] = useState([]);
+  const [cards, setCards] = useState([]);
+  const [enteredName, setEnteredName] = useState(false);
 
   useEffect(() => {
     setSocket(socketIOClient(
@@ -46,11 +52,13 @@ function App() {
 
   useEffect(() => {
     socket && socket.on('playerEntered', (name) => {
-      console.log(name);
-      console.log(players);
-      console.log([...players, name]);
       setPlayers(players => [...players, name]);
     });
+
+    socket && socket.on('cardsDealt', (dealtCards) => {
+      console.log(dealtCards);
+      setCards(dealtCards);
+    })
   }, [socket]);
 
   return (
@@ -58,38 +66,43 @@ function App() {
         <div>
             <Card className={classes.playersBox}>
                 <CardContent>
-                    <Typography>玩家們:</Typography>
-                    <Typography>{players.toString()}</Typography>
+                    <Typography>遊戲參加者:</Typography>
+                    <Typography>{players.map((player) => (
+                        <div>
+                            {player}<br />
+                        </div>
+                    ))}</Typography>
                 </CardContent>
             </Card>
-            <div className={classes.enterNameBox}>
-                <EnterName />
-            </div>
+            <Button
+                className={classes.startGameButton}
+                variant="contained"
+                color="primary"
+                onClick={() => socket.emit('startGame')}
+            >
+                開始遊戲
+            </Button>
+            {!enteredName &&
+                <div className={classes.enterNameBox}>
+                    <EnterName setEnteredName={setEnteredName} />
+                </div>
+            }
+
+            { cards.length > 0 && (
+                <div className={classes.cards}>
+                    {console.log(cards)}
+                    {cards.map((card, index) => (
+                        <PlayingCard
+                            key={index}
+                            color={card.color}
+                            suit={card.suit}
+                            value={card.value}
+                        />
+                    ))}
+                </div>
+            )}
         </div>
     </SocketContext.Provider>
-
-//    <div className={classes.cards}>
-//      <PlayingCard
-//        color={Color.BLACK}
-//        suit={Suit.HEARTS}
-//        value={Value.JACK}
-//      />
-//      <PlayingCard
-//        color={Color.RED}
-//        suit={Suit.SPADES}
-//        value={Value.QUEEN}
-//      />
-//      <PlayingCard
-//        color={Color.RED}
-//        suit={Suit.CLUBS}
-//        value={Value.THREE}
-//      />
-//      <PlayingCard
-//        color={Color.BLACK}
-//        suit={Suit.DIAMONDS}
-//        value={Value.ACE}
-//      />
-//    </div>
   );
 }
 

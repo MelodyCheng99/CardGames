@@ -17,7 +17,7 @@ const useStyles = makeStyles({
     }
 })
 
-function EnterName() {
+function EnterName({ setEnteredName }) {
     const classes = useStyles();
     const socket = useContext(SocketContext);
     const [name, setName] = useState('');
@@ -34,7 +34,10 @@ function EnterName() {
                 <Button
                     variant="contained"
                     color="primary"
-                    onClick={() => socket.emit('enterName', name)}
+                    onClick={() => {
+                        setEnteredName(true);
+                        socket.emit('enterName', name)
+                    }}
                 >
                     提交
                 </Button>
