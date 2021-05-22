@@ -1,4 +1,4 @@
-import { Card, CardContent, Typography, Button } from '@material-ui/core';
+import { Card, CardContent, Typography, Button, List, ListItem } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles'
 import React, { useEffect, useState } from 'react'
 import socketIOClient from 'socket.io-client';
@@ -27,9 +27,20 @@ const useStyles = makeStyles({
     },
     cards: {
         display: 'flex',
-        justifyContent: 'center',
         alignItems: 'flex-end',
         height: '550px',
+        maxWidth: '1650px',
+        overflow: 'auto'
+    },
+    card: {
+        display: 'flex',
+        flexDirection: 'column'
+    },
+    playedCard: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100px',
         width: '100%'
     }
 })
@@ -41,6 +52,7 @@ function App() {
   const [socket, setSocket] = useState(undefined);
   const [players, setPlayers] = useState([]);
   const [cards, setCards] = useState([]);
+  const [cardsPlayed, setCardsPlayed] = useState([]);
   const [enteredName, setEnteredName] = useState(false);
 
   useEffect(() => {
@@ -56,8 +68,11 @@ function App() {
     });
 
     socket && socket.on('cardsDealt', (dealtCards) => {
-      console.log(dealtCards);
       setCards(dealtCards);
+    })
+
+    socket && socket.on('cardPlayed', (cardPlayed) => {
+      setCardsPlayed(cardsPlayed => [...cardsPlayed, cardPlayed]);
     })
   }, [socket]);
 
@@ -80,26 +95,43 @@ function App() {
                 color="primary"
                 onClick={() => socket.emit('startGame')}
             >
-                開始遊戲
+                玩呀玩呀玩呀
             </Button>
-            {!enteredName &&
+            { !enteredName &&
                 <div className={classes.enterNameBox}>
                     <EnterName setEnteredName={setEnteredName} />
                 </div>
             }
 
-            { cards.length > 0 && (
-                <div className={classes.cards}>
-                    {console.log(cards)}
-                    {cards.map((card, index) => (
-                        <PlayingCard
-                            key={index}
-                            color={card.color}
-                            suit={card.suit}
-                            value={card.value}
-                        />
-                    ))}
+            { cardsPlayed.length > 0 &&
+                <div className={classes.playedCard}>
+                    <PlayingCard
+                        color={cardsPlayed[cardsPlayed.length - 1].color}
+                        suit={cardsPlayed[cardsPlayed.length - 1].suit}
+                        value={cardsPlayed[cardsPlayed.length - 1].value}
+                    />
                 </div>
+            }
+
+            { cards.length > 0 && (
+                <List className={classes.cards}>
+                    {cards.map((card, index) => (
+                        <ListItem className={classes.card} key={index}>
+                            <PlayingCard
+                                color={card.color}
+                                suit={card.suit}
+                                value={card.value}
+                            />
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={() => socket.emit('playCard', socket.id, index)}
+                            >
+                                遊戲卡
+                            </Button>
+                        </ListItem>
+                    ))}
+                </List>
             )}
         </div>
     </SocketContext.Provider>

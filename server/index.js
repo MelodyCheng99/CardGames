@@ -57,6 +57,20 @@ io.on('connection', (socket) => {
         }
     })
 
+    socket.on('playCard', (player, cardIndex) => {
+        let playerCards = playersCards[player];
+        const cardPlayed = playerCards[cardIndex];
+        playerCards.splice(cardIndex, 1);
+        playersCards[player] = playerCards;
+
+        io.to(player).emit(
+            'cardsDealt',
+            playerCards
+        );
+
+        io.emit('cardPlayed', cardPlayed);
+    })
+
     socket.on('disconnect', () => {
         console.log('Client disconnected :(');
 
