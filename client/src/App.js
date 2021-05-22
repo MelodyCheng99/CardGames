@@ -94,6 +94,7 @@ function App() {
                 variant="contained"
                 color="primary"
                 onClick={() => socket.emit('startGame')}
+                disabled={cards.length > 0 || !enteredName}
             >
                 玩呀玩呀玩呀
             </Button>
@@ -127,7 +128,7 @@ function App() {
                                 color="primary"
                                 onClick={() => socket.emit('playCard', socket.id, index)}
                             >
-                                遊戲卡
+                                出卡
                             </Button>
                         </ListItem>
                     ))}
