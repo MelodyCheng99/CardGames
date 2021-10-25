@@ -71,6 +71,18 @@ io.on('connection', (socket) => {
         io.emit('cardPlayed', cardPlayed);
     })
 
+    socket.on('withdrawCard', (player, card) => {
+        let playerCards = playersCards[player];
+        playerCards.push(card);
+
+        io.to(player).emit(
+            'cardsDealt',
+            playerCards
+        );
+
+        io.emit('cardWithdrawn', card);
+    })
+
     socket.on('disconnect', () => {
         console.log('Client disconnected :(');
 
