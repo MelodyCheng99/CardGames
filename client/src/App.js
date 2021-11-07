@@ -5,6 +5,7 @@ import socketIOClient from 'socket.io-client';
 
 import { EnterName } from './components/enterName'
 import { PlayingCard } from './components/playingCard'
+import { History } from './components/history'
 
 const useStyles = makeStyles({
     enterNameBox: {
@@ -17,18 +18,19 @@ const useStyles = makeStyles({
     playersBox: {
         marginTop: 10,
         marginLeft: 10,
-        width: 150,
+        width: 250,
         height: 200
     },
     startGameButton: {
         marginLeft: 10,
-        marginTop: 10
+        marginTop: 10,
+        width: 250
     },
     cards: {
         display: 'flex',
         alignItems: 'flex-end',
         height: '550px',
-        maxWidth: '1650px',
+        maxWidth: '100%',
         overflow: 'auto'
     },
     card: {
@@ -39,8 +41,12 @@ const useStyles = makeStyles({
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        height: '100px',
-        width: '100%'
+        flexDirection: 'column'
+    },
+    upperSection: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between'
     }
 })
 
@@ -53,6 +59,7 @@ function App() {
     const [cards, setCards] = useState([]);
     const [cardsPlayed, setCardsPlayed] = useState([]);
     const [enteredName, setEnteredName] = useState(false);
+    const [history, setHistory] = useState([]);
 
     useEffect(() => {
         setSocket(socketIOClient(
@@ -77,7 +84,7 @@ function App() {
             cardsPlayedToUpdate.push(cardPlayed)
             setCardsPlayed(cardsPlayedToUpdate);
         })
-    
+
         socket && socket.on('cardWithdrawn', (cardWithdrawn) => {
             let cardsPlayedToUpdate = [...cardsPlayed]
             let cardsPlayedToUpdateIdx = 0
@@ -85,49 +92,56 @@ function App() {
                 if (cardPlayed.color === cardWithdrawn.color &&
                     cardPlayed.suit === cardWithdrawn.suit &&
                     cardPlayed.value === cardWithdrawn.value) {
-                        cardsPlayedToUpdate.splice(cardsPlayedToUpdateIdx, 1)
-                        break
+                    cardsPlayedToUpdate.splice(cardsPlayedToUpdateIdx, 1)
+                    break
                 }
                 cardsPlayedToUpdateIdx++
             }
-    
+
             setCardsPlayed(cardsPlayedToUpdate);
+        })
+
+        socket && socket.on('historyUpdate', (cardPlayed, action, player) => {
+            setHistory([...history, { cardPlayed, action, player }])
         })
 
         return () => {
             socket && socket.off('cardPlayed')
             socket && socket.off('cardWithdrawn')
+            socket && socket.off('historyUpdate')
         };
-    }, [socket, cardsPlayed])
+    }, [socket, cardsPlayed, history])
 
     return (
         <SocketContext.Provider value={socket}>
-            <div>
-                <Card className={classes.playersBox}>
-                    <CardContent>
-                        <Typography>遊戲參加者:</Typography>
-                        <Typography>{players.map((player) => (
-                            <div>
-                                {player}<br />
-                            </div>
-                        ))}</Typography>
-                    </CardContent>
-                </Card>
-                <Button
-                    className={classes.startGameButton}
-                    variant="contained"
-                    color="primary"
-                    onClick={() => socket.emit('startGame')}
-                    disabled={cards.length > 0 || !enteredName}
-                >
-                    玩呀玩呀玩呀
-                </Button>
+            <div className={classes.upperSection}>
+                <div>
+                    <Card className={classes.playersBox}>
+                        <CardContent>
+                            <Typography>遊戲參加者:</Typography>
+                            <Typography>{players.map((player) => (
+                                <div>
+                                    {player}<br />
+                                </div>
+                            ))}</Typography>
+                        </CardContent>
+                    </Card>
+                    <Button
+                        className={classes.startGameButton}
+                        variant="contained"
+                        color="primary"
+                        onClick={() => socket.emit('startGame')}
+                        disabled={cards.length > 0 || !enteredName}
+                    >
+                        玩呀玩呀玩呀
+                    </Button>
+                </div>
+
                 {!enteredName &&
                     <div className={classes.enterNameBox}>
                         <EnterName setEnteredName={setEnteredName} />
                     </div>
                 }
-
                 {cardsPlayed.length > 0 &&
                     <div className={classes.playedCard}>
                         <PlayingCard
@@ -136,7 +150,6 @@ function App() {
                             value={cardsPlayed[cardsPlayed.length - 1].value}
                         />
                         <Button
-                            className={classes.withdrawCardButton}
                             variant="contained"
                             color="primary"
                             onClick={() => socket.emit(
@@ -145,11 +158,14 @@ function App() {
                                 cardsPlayed[cardsPlayed.length - 1]
                             )}
                         >
-                            取款卡
+                            取咭
                         </Button>
                     </div>
                 }
 
+                <History history={history} />
+            </div>
+            <div>
                 {cards.length > 0 && (
                     <List className={classes.cards}>
                         {cards.map((card, index) => (

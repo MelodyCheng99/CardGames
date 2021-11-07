@@ -2,7 +2,6 @@ import { Card, CardContent, Typography, TextField, Button } from '@material-ui/c
 import { makeStyles } from '@material-ui/core/styles'
 
 import React, { useContext, useState } from 'react'
-import socketIOClient from 'socket.io-client';
 
 import { SocketContext } from '../../App.js'
 
@@ -29,14 +28,14 @@ function EnterName({ setEnteredName }) {
                 <TextField
                     className={classes.nameInput}
                     variant="outlined"
-                    onChange={(event: object) => setName(event.target.value)}
+                    onChange={(event) => setName(event.target.value)}
                 />
                 <Button
                     variant="contained"
                     color="primary"
                     onClick={() => {
                         setEnteredName(true);
-                        socket.emit('enterName', name)
+                        socket.emit('enterName', socket.id, name)
                     }}
                 >
                     提交

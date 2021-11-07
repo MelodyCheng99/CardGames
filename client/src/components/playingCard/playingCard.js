@@ -1,10 +1,9 @@
 import { Card, CardContent, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles'
-import { Favorite } from '@material-ui/icons'
 
 import React from 'react'
 
-import { Color, Suit, Value } from './constants.js'
+import { Color, Suit } from './constants.js'
 
 const useStyles = makeStyles({
     card: {

@@ -14,6 +14,7 @@ const io = socketIO(server);
 
 let players = [];
 let playersCards = {};
+let socketIdToName = {};
 
 io.on('connection', (socket) => {
     console.log('New client connected!');
@@ -21,8 +22,9 @@ io.on('connection', (socket) => {
     playersCards[socket.id] = [];
 
     // TODO: Place in a different file
-    socket.on('enterName', (name) => {
+    socket.on('enterName', (socketId, name) => {
         console.log(name, 'joined the game!');
+        socketIdToName[socketId] = name;
         io.emit('playerEntered', name);
     });
 
@@ -69,6 +71,20 @@ io.on('connection', (socket) => {
         );
 
         io.emit('cardPlayed', cardPlayed);
+
+        // Emit for history
+        io.to(player).emit(
+            'historyUpdate',
+            cardPlayed,
+            'play',
+            undefined
+        )
+        socket.broadcast.emit(
+            'historyUpdate',
+            cardPlayed,
+            'play',
+            socketIdToName[player]
+        )
     })
 
     socket.on('withdrawCard', (player, card) => {
@@ -81,6 +97,20 @@ io.on('connection', (socket) => {
         );
 
         io.emit('cardWithdrawn', card);
+
+        // Emit for history
+        io.to(player).emit(
+            'historyUpdate',
+            card,
+            'withdraw',
+            undefined
+        )
+        socket.broadcast.emit(
+            'historyUpdate',
+            card,
+            'withdraw',
+            socketIdToName[player]
+        )
     })
 
     socket.on('disconnect', () => {
