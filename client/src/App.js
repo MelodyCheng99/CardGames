@@ -6,6 +6,7 @@ import socketIOClient from 'socket.io-client';
 import { EnterName } from './components/enterName'
 import { PlayingCard } from './components/playingCard'
 import { History } from './components/history'
+import { GameConfigModal } from './components/gameConfigModal'
 
 const useStyles = makeStyles({
     enterNameBox: {
@@ -37,7 +38,7 @@ const useStyles = makeStyles({
         display: 'flex',
         flexDirection: 'column'
     },
-    playedCard: {
+    cardsPile: {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -60,6 +61,8 @@ function App() {
     const [cardsPlayed, setCardsPlayed] = useState([]);
     const [enteredName, setEnteredName] = useState(false);
     const [history, setHistory] = useState([]);
+    const [openGameConfigModal, setOpenGameConfigModal] = useState(false);
+    const [deck, setDeck] = useState([]);
 
     useEffect(() => {
         setSocket(socketIOClient(
@@ -73,8 +76,9 @@ function App() {
             setPlayers(players => [...players, name]);
         });
 
-        socket && socket.on('cardsDealt', (dealtCards) => {
+        socket && socket.on('cardsDealt', (dealtCards, undealtCards) => {
             setCards(dealtCards);
+            undealtCards && setDeck(undealtCards);
         })
     }, [socket]);
 
@@ -130,7 +134,7 @@ function App() {
                         className={classes.startGameButton}
                         variant="contained"
                         color="primary"
-                        onClick={() => socket.emit('startGame')}
+                        onClick={() => setOpenGameConfigModal(true)}
                         disabled={cards.length > 0 || !enteredName}
                     >
                         玩呀玩呀玩呀
@@ -142,8 +146,19 @@ function App() {
                         <EnterName setEnteredName={setEnteredName} />
                     </div>
                 }
+                {deck.length > 0 &&
+                    <div className={classes.cardsPile}>
+                        <Typography>卡片組</Typography>
+                        <PlayingCard
+                            color={deck[deck.length - 1].color}
+                            suit={deck[deck.length - 1].suit}
+                            value={deck[deck.length - 1].value}
+                        />
+                    </div>
+                }
                 {cardsPlayed.length > 0 &&
-                    <div className={classes.playedCard}>
+                    <div className={classes.cardsPile}>
+                        <Typography>打牌</Typography>
                         <PlayingCard
                             color={cardsPlayed[cardsPlayed.length - 1].color}
                             suit={cardsPlayed[cardsPlayed.length - 1].suit}
@@ -164,6 +179,12 @@ function App() {
                 }
 
                 <History history={history} />
+
+                <GameConfigModal
+                    open={openGameConfigModal}
+                    setOpenGameConfigModal={setOpenGameConfigModal}
+                    players={players}
+                />
             </div>
             <div>
                 {cards.length > 0 && (

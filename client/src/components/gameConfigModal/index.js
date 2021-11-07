@@ -1,0 +1,1 @@
+export { default as GameConfigModal } from './gameConfigModal'

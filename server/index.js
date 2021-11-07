@@ -15,6 +15,7 @@ const io = socketIO(server);
 let players = [];
 let playersCards = {};
 let socketIdToName = {};
+let deck = [];
 
 io.on('connection', (socket) => {
     console.log('New client connected!');
@@ -28,13 +29,14 @@ io.on('connection', (socket) => {
         io.emit('playerEntered', name);
     });
 
-    socket.on('startGame', () => {
+    socket.on('startGame', (numCards) => {
         if (players.length > 1) {
             let cardsToDeal = cards.slice();
             const totalNumPlayers = players.length;
             let currentPlayer = 0;
+            let numCard = 0;
 
-            while (cardsToDeal.length > 0) {
+            while (numCard < numCards) {
                 const cardIndex = Math.floor(Math.random() * (cardsToDeal.length - 1));
 
                 let currentPlayersCards = playersCards[players[currentPlayer]];
@@ -45,15 +47,18 @@ io.on('connection', (socket) => {
 
                 if (currentPlayer == totalNumPlayers - 1) {
                     currentPlayer = 0;
+                    numCard++;
                 } else {
                     currentPlayer++;
                 }
             }
+            deck = [...cardsToDeal]
 
             players.forEach((player) => {
                 io.to(player).emit(
                     'cardsDealt',
-                    playersCards[player]
+                    playersCards[player],
+                    deck
                 );
             });
         }
