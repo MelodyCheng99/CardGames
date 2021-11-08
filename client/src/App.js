@@ -148,17 +148,22 @@ function App() {
                 }
                 {deck.length > 0 &&
                     <div className={classes.cardsPile}>
-                        <Typography>卡片組</Typography>
-                        <PlayingCard
-                            color={deck[deck.length - 1].color}
-                            suit={deck[deck.length - 1].suit}
-                            value={deck[deck.length - 1].value}
-                        />
+                        <Typography>抽咭</Typography>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => socket.emit(
+                                'drawCard',
+                                socket.id
+                            )}
+                        >
+                            抽卡
+                        </Button>
                     </div>
                 }
                 {cardsPlayed.length > 0 &&
                     <div className={classes.cardsPile}>
-                        <Typography>打牌</Typography>
+                        <Typography>出咭</Typography>
                         <PlayingCard
                             color={cardsPlayed[cardsPlayed.length - 1].color}
                             suit={cardsPlayed[cardsPlayed.length - 1].suit}

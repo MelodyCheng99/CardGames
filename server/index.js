@@ -36,6 +36,7 @@ io.on('connection', (socket) => {
             let currentPlayer = 0;
             let numCard = 0;
 
+            // Deal cards to player
             while (numCard < numCards) {
                 const cardIndex = Math.floor(Math.random() * (cardsToDeal.length - 1));
 
@@ -52,7 +53,14 @@ io.on('connection', (socket) => {
                     currentPlayer++;
                 }
             }
-            deck = [...cardsToDeal]
+
+            // Shuffle remaining cards
+            while (cardsToDeal.length > 0) {
+                const cardIndex = Math.floor(Math.random() * (cardsToDeal.length - 1));
+                deck.push(cardsToDeal[cardIndex]);
+                
+                cardsToDeal.splice(cardIndex, 1);
+            }
 
             players.forEach((player) => {
                 io.to(player).emit(
@@ -114,6 +122,33 @@ io.on('connection', (socket) => {
             'historyUpdate',
             card,
             'withdraw',
+            socketIdToName[player]
+        )
+    })
+
+    socket.on('drawCard', (player) => {
+        let playerCards = playersCards[player];
+        const card = deck.pop();
+        playerCards.push(card);
+
+        io.to(player).emit(
+            'cardsDealt',
+            playerCards,
+            deck
+        );
+        io.emit('cardWithdrawn', card);
+
+        // Emit for history
+        io.to(player).emit(
+            'historyUpdate',
+            card,
+            'draw',
+            undefined
+        )
+        socket.broadcast.emit(
+            'historyUpdate',
+            card,
+            'draw',
             socketIdToName[player]
         )
     })

@@ -30,8 +30,6 @@ const GameConfigModal = ({ open, setOpenGameConfigModal, players }) => {
 
     const [numCards, setNumCards] = useState()
     const intNumCards = parseInt(numCards)
-    console.log(players.length && Math.ceil(52 / players.length))
-    // console.log(players.length)
 
     return (
         <Modal

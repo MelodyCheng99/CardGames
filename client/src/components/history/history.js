@@ -34,26 +34,27 @@ const History = ({ history }) => {
                 <Typography>活動:</Typography>
                 <Typography>{history?.map((event) => {
                     let prettifiedEvent = ''
-                    if (event.action === "play") {
-                        if (event.player) {
-                            prettifiedEvent = `${event.player}玩了`
-                        } else {
-                            prettifiedEvent = '你玩了'
-                        }
+
+                    if (event.player) {
+                        prettifiedEvent = event.player
                     } else {
-                        if (event.player) {
-                            prettifiedEvent = `${event.player}取咭了`
-                        } else {
-                            prettifiedEvent = '你取咭了'
-                        }
+                        prettifiedEvent = '你'
                     }
 
-                    prettifiedEvent += `${event.cardPlayed.value}的`
+                    if (event.action === "play") {
+                        prettifiedEvent += '出了'
+                    } else if (event.action === "withdraw") {
+                        prettifiedEvent += '抽了'
+                    } else {
+                        prettifiedEvent += '抽到了'
+                    }
 
                     return (
                         <div key={`${event.cardPlayed.suit}-${event.cardPlayed.value}-${event.cardPlayed.color}`}>
                             {prettifiedEvent}
-                            {getTextGivenSuit(event.cardPlayed.suit)}
+                            {event.action === "draw" && '牌'}
+                            {event.action !== "draw" && getTextGivenSuit(event.cardPlayed.suit)}
+                            {event.action !== "draw" && event.cardPlayed.value}
                             <br />
                         </div>
                     )
